@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="Интерактивное приложение для создания и прохождения тестов">
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-container">
+    <div class="top-bar">
+        <div class="header-title">Создание и прохождение тестов</div>
+        <div class="top-controls"></div>
+    </div>
+
+    <div class="settings-panel">
+        <button type="button" class="settings-toggle" id="settings-toggle">⚙️ Настройки</button>
+        <div id="settings-panel" class="settings-content hidden">
+            <label class="settings-row"><input type="checkbox" id="toggle-themes" checked> Темы и оформление</label>
+            <label class="settings-row"><input type="checkbox" id="toggle-stats" checked> Статистика и проценты</label>
+            <div class="settings-card">
+                <div class="settings-card-title">Режим игры</div>
+                <div class="settings-grid">
+                    <label class="settings-control">
+                        <span>Время на вопрос</span>
+                        <select id="question-time-select">
+                            <option value="3">3 секунды</option>
+                            <option value="5" selected>5 секунд</option>
+                            <option value="8">8 секунд</option>
+                            <option value="10">10 секунд</option>
+                            <option value="15">15 секунд</option>
+                        </select>
+                    </label>
+                    <label class="settings-control">
+                        <span>Режим</span>
+                        <select id="game-mode-select">
+                            <option value="classic">Классический</option>
+                            <option value="sprint">Спринт</option>
+                            <option value="marathon">Марафон</option>
+                        </select>
+                    </label>
+                    <label class="settings-control" id="question-count-setting">
+                        <span>Вопросов в серии</span>
+                        <select id="question-count-select">
+                            <option value="auto" selected>Авто</option>
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                        </select>
+                    </label>
+                    <label class="settings-control">
+                        <span>Размер шрифта</span>
+                        <select id="font-size-select">
+                            <option value="16">16 px</option>
+                            <option value="18">18 px</option>
+                            <option value="20">20 px</option>
+                            <option value="22">22 px</option>
+                            <option value="24">24 px</option>
+                            <option value="28">28 px</option>
+                            <option value="32" selected>32 px</option>
+                        </select>
+                    </label>
+                    <label class="settings-control">
+                        <span>Повторять вопрос</span>
+                        <select id="repeat-count-select">
+                            <option value="1" selected>1 раз</option>
+                            <option value="2">2 раза</option>
+                            <option value="3">3 раза</option>
+                            <option value="4">4 раза</option>
+                            <option value="5">5 раз</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-hint" id="game-mode-hint">Классический режим: проходите серию вопросов с таймером.</div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-title">Цвета кнопок</div>
+                <div class="settings-grid">
+                    <label class="settings-control">
+                        <span>Обычная кнопка</span>
+                        <input type="color" id="button-color-picker" value="#7c3aed">
+                    </label>
+                    <label class="settings-control">
+                        <span>Кнопка правильного ответа</span>
+                        <input type="color" id="correct-button-color-picker" value="#22c55e">
+                    </label>
+                    <label class="settings-control">
+                        <span>Кнопка неправильного ответа</span>
+                        <input type="color" id="wrong-button-color-picker" value="#ef4444">
+                    </label>
+                    <label class="settings-control">
+                        <span>Текст кнопок</span>
+                        <input type="color" id="button-text-color-picker" value="#ffffff">
+                    </label>
+                    <label class="settings-control">
+                        <span>Мятный акцент</span>
+                        <input type="color" id="accent-orange-color-picker" value="#0f766e">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-nav" id="page-nav">
+        <div class="nav-row">
+            <button type="button" class="page-nav-btn" id="prev-page-btn" aria-label="Назад">←</button>
+            <button type="button" class="page-nav-btn" id="next-page-btn" aria-label="Вперёд">→</button>
+        </div>
+    </div>
+
+    <button type="button" class="scroll-to-top-btn" id="scroll-to-top-btn" aria-label="Наверх">↑</button>
+
+    <div id="welcome-screen" class="welcome-screen">
+        <div class="welcome-card">
+            <h2>Создай и пройди тест за 3 простых шага</h2>
+            <p>Выбери один из режимов и начни создавать вопросы или проходить готовые тесты.</p>
+            <div class="welcome-options">
+                <button type="button" class="welcome-option welcome-practice-card" id="open-practice-btn">▶ Пройти глобальные тесты</button>
+                <button type="button" class="welcome-option regular" id="open-history-btn">📜 История прохождения</button>
+                <button type="button" class="welcome-option regular" id="open-creator-btn">✎ Создать тесты</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="practice-section" style="display: none;">
+        <div class="header-title">Прохождение тестов</div>
+        <div class="practice-settings-card">
+            <h3>Режим прохождения</h3>
+            <div class="inline-actions" style="margin-top: 8px;">
+                <button type="button" class="helper-btn mode-toggle-btn" id="switch-to-survey-practice-btn" data-mode-toggle="survey">Опрос</button>
+                <button type="button" class="helper-btn mode-toggle-btn" id="switch-to-puzzle-practice-btn" data-mode-toggle="puzzle">Мазайка</button>
+            </div>
+        </div>
+        <div class="practice-settings-card">
+            <h3>Настройки внешнего вида</h3>
+            <div class="practice-settings-grid">
+                <label class="settings-control">
+                    <span>Размер шрифта</span>
+                    <select id="practice-font-size-select">
+                        <option value="16">16 px</option>
+                        <option value="18">18 px</option>
+                        <option value="20">20 px</option>
+                        <option value="22">22 px</option>
+                        <option value="24">24 px</option>
+                        <option value="28">28 px</option>
+                        <option value="32" selected>32 px</option>
+                    </select>
+                </label>
+                <label class="settings-control">
+                    <span>Обычная кнопка</span>
+                    <input type="color" id="practice-button-color-picker" value="#7c3aed">
+                </label>
+                <label class="settings-control">
+                    <span>Кнопка правильного ответа</span>
+                    <input type="color" id="practice-correct-button-color-picker" value="#22c55e">
+                </label>
+                <label class="settings-control">
+                    <span>Кнопка неправильного ответа</span>
+                    <input type="color" id="practice-wrong-button-color-picker" value="#ef4444">
+                </label>
+                <label class="settings-control">
+                    <span>Текст кнопок</span>
+                    <input type="color" id="practice-button-text-color-picker" value="#ffffff">
+                </label>
+                <label class="settings-control">
+                    <span>Акцент</span>
+                    <input type="color" id="practice-accent-color-picker" value="#0f766e">
+                </label>
+            </div>
+        </div>
+        <div id="practice-tests-list" class="saved-tests-list"></div>
+        <button type="button" class="switch-btn" id="back-to-home-btn">Вернуться в начало</button>
+    </div>
+
+    <div id="history-section" style="display: none;">
+        <div class="header-title">История прохождения</div>
+        <div class="practice-settings-card">
+            <h3>Здесь будет история ваших результатов</h3>
+            <p class="helper-text">Пока что это заглушка. В будущем сюда можно добавить список пройденных тестов и статистику.</p>
+        </div>
+        <button type="button" class="switch-btn" id="back-to-home-from-history-btn">Вернуться в начало</button>
+    </div>
+
+    <div id="creator-section" style="display: none;">
+        <div class="mode-block" style="margin-bottom: 12px;">
+            <h3>Способы создания</h3>
+            <div class="inline-actions" style="margin-top: 8px;">
+                <button type="button" class="helper-btn mode-toggle-btn" id="switch-to-survey-btn" data-mode-toggle="survey">Опрос</button>
+                <button type="button" class="helper-btn mode-toggle-btn" id="switch-to-puzzle-btn" data-mode-toggle="puzzle">Мазайка</button>
+            </div>
+            <div class="welcome-options creator-mode-options">
+                <button type="button" class="welcome-option creator-mode-chip is-active" id="open-manual-btn" data-creator-mode="manual">1. Ручное создание</button>
+                <button type="button" class="welcome-option creator-mode-chip" id="open-paste-btn" data-creator-mode="paste">2. Вставка готового текста</button>
+                <button type="button" class="welcome-option creator-mode-chip" id="open-file-btn" data-creator-mode="file">3. Импорт из файла</button>
+            </div>
+        </div>
+        <form id="quiz-form" onsubmit="return false;">
+            <div class="mode-block" data-mode-group="manual" style="display: none;">
+                <h3>1. Ручное создание вопроса</h3>
+                <div class="form-group">
+                    <label>Вопрос (текст):</label>
+                    <textarea id="q-text" placeholder="Введите текст вопроса..."></textarea>
+                </div>
+
+                <div class="form-group" id="question-type-group">
+                    <label>Тип задания</label>
+                    <select id="question-type-select">
+                        <option value="choice">Выбор ответа</option>
+                        <option value="matching">Соответствие</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="wrong-count-group">
+                    <label>Количество неправильных вариантов</label>
+                    <select id="wrong-count-select">
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label id="correct-answer-label" class="label-correct">Правильный ответ:</label>
+                    <input type="text" id="correct-ans" placeholder="Введите верный вариант...">
+                </div>
+
+                <div class="form-group wrong-answers-container" id="wrong-answers-group">
+                    <label id="wrong-label" class="label-wrong">Неправильные варианты:</label>
+                    <p class="helper-text">Можно вставить сразу много вариантов через запятую или точку. Например: Москва, Париж, Берлин.</p>
+                    <textarea id="bulk-wrong-answers" placeholder="Введите сразу много неправильных вариантов..."></textarea>
+                    <button type="button" class="helper-btn" id="generate-random-btn">Сгенерировать случайные слова</button>
+                    <div id="wrong-answer-inputs" style="display: none;">
+                        <div class="form-group-sub">
+                            <input type="text" class="wrong-ans" data-index="0" placeholder="Неправильный вариант 1">
+                        </div>
+                        <div class="form-group-sub">
+                            <input type="text" class="wrong-ans" data-index="1" placeholder="Неправильный вариант 2">
+                        </div>
+                        <div class="form-group-sub">
+                            <input type="text" class="wrong-ans" data-index="2" placeholder="Неправильный вариант 3">
+                        </div>
+                        <div class="form-group-sub">
+                            <input type="text" class="wrong-ans" data-index="3" placeholder="Неправильный вариант 4">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mode-block" data-mode-group="paste" style="display: none;">
+                <h3>2. Вставьте готовый текст</h3>
+                <div class="form-group">
+                    <label>Текст с вопросами и ответами или список слов</label>
+                    <textarea id="paste-text-input" placeholder="Вопрос 1: ... Ответ 1: ...&#10;Вопрос 2: ... Ответ 2: ...&#10;apple — яблоко&#10;dog — собака"></textarea>
+                    <div class="inline-actions">
+                        <button type="button" class="helper-btn" id="generate-paste-btn">Сгенерировать из текста</button>
+                        <button type="button" class="helper-btn" id="download-paste-test-btn">⬇️ Скачать готовый тест</button>
+                        <button type="button" class="helper-btn" id="answer-count-btn">Количество ответов</button>
+                    </div>
+                    <label class="small-label">Количество неправильных вариантов</label>
+                    <select id="answer-count-select">
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                    </select>
+                    <div id="paste-status" class="answer-image-status"></div>
+                </div>
+            </div>
+
+            <div class="mode-block" data-mode-group="file" style="display: none;">
+                <h3>3. Автоматический импорт из файла</h3>
+                <div class="form-group pdf-import-group">
+                    <label>Автоматический режим из PDF или фото</label>
+                    <p class="helper-text">Выберите файл, укажите количество неправильных вариантов и нажмите «Сгенерировать тест».</p>
+                    <div class="file-input-wrapper">
+                        <label class="file-label small" for="auto-pdf-upload">📄 Выбрать PDF или фото</label>
+                        <input type="file" id="auto-pdf-upload" accept="application/pdf,image/*">
+                    </div>
+                    <label class="small-label">Количество неправильных вариантов</label>
+                    <select id="auto-wrong-count-select">
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                    </select>
+                    <button type="button" class="helper-btn" id="generate-auto-test-btn">Сгенерировать тест</button>
+                    <div id="auto-pdf-status" class="answer-image-status"></div>
+                </div>
+            </div>
+
+            <div class="mode-block" id="editing-questions-panel" style="display: none;">
+                <h3>Сохранённые вопросы</h3>
+                <div id="editing-questions-list" class="editing-questions-list"></div>
+                <button type="button" class="helper-btn" id="add-more-questions-btn">Добавить ещё вопросы?</button>
+                <div id="add-more-questions-panel" class="add-more-questions-panel" style="display: none;">
+                    <div class="inline-actions">
+                        <button type="button" class="helper-btn" data-add-mode="manual">Ручной ввод</button>
+                        <button type="button" class="helper-btn" data-add-mode="file">Импорт из файла</button>
+                        <button type="button" class="helper-btn" data-add-mode="paste">Вставка текста</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mode-block" style="display: none;">
+                <h3>4. Сохранение</h3>
+                <div class="form-group">
+                    <label for="test-title-input">Название теста</label>
+                    <input type="text" id="test-title-input" placeholder="Например: География 5 класс">
+                </div>
+                <div class="form-group">
+                    <label for="test-author-input">Автор</label>
+                    <input type="text" id="test-author-input" placeholder="Ваше имя или ник">
+                </div>
+                <div class="inline-actions">
+                    <button type="button" class="submit-btn" id="save-btn">Сохранить и далее</button>
+                    <button type="button" class="helper-btn" id="save-library-btn">Сохранить тест в библиотеку</button>
+                </div>
+                <div class="form-group">
+                    <label for="save-mode-select">Режим сохранения</label>
+                    <select id="save-mode-select">
+                        <option value="local">Только у меня</option>
+                        <option value="shared">Сохранить для всех</option>
+                    </select>
+                </div>
+                <div class="inline-actions">
+                    <button type="button" class="switch-btn" id="clear-all-btn">Удалить все сохранения</button>
+                    <button type="button" class="helper-btn" id="view-library-btn">Посмотреть готовые тесты</button>
+                </div>
+                <button type="button" class="switch-btn" id="start-game-btn" style="display: none;">Запустить игру (0 вопросов)</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="game-section" style="display: none;">
+        <div class="game-top-row">
+            <div class="mode-pill" id="game-mode-pill">Классический</div>
+            <div class="progress-pill" id="game-progress-pill">0 / 10</div>
+        </div>
+        <div class="header-title" id="game-mode-title">Вопрос / Фото?</div>
+        <div id="match-hint" class="match-hint" style="display: none;">Выберите правильное соответствие</div>
+
+        <div id="game-question-container">
+            <p id="game-question-text"></p>
+            <img id="game-question-image" src="" alt="Вопрос по фото" style="display: none;">
+        </div>
+
+        <div id="puzzle-questions-container" class="puzzle-questions-container" style="display: none;"></div>
+
+        <div class="answers-grid">
+            <button class="answer-btn" type="button" data-answer-index="0">1. <span class="btn-text"></span><img class="answer-image-preview" alt="Вариант ответа"></button>
+            <button class="answer-btn" type="button" data-answer-index="1">2. <span class="btn-text"></span><img class="answer-image-preview" alt="Вариант ответа"></button>
+            <button class="answer-btn" type="button" data-answer-index="2">3. <span class="btn-text"></span><img class="answer-image-preview" alt="Вариант ответа"></button>
+            <button class="answer-btn" type="button" data-answer-index="3">4. <span class="btn-text"></span><img class="answer-image-preview" alt="Вариант ответа"></button>
+        </div>
+
+        <button type="button" class="switch-btn finish-btn" id="finish-learning-btn">Закончить заучивание</button>
+    </div>
+
+    <div id="stats-section" style="display: none;">
+        <div class="header-title">Результат обучения</div>
+        <div class="stats-card">
+            <div class="progress-ring-wrapper">
+                <div class="progress-ring">
+                    <div class="progress-ring-inner">
+                        <span id="stats-percent">0%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-row">
+                <span>Правильных ответов</span>
+                <strong id="stats-correct">0</strong>
+            </div>
+            <div class="stats-row">
+                <span>Ошибок</span>
+                <strong id="stats-incorrect">0</strong>
+            </div>
+            <div class="stats-row">
+                <span>Время прохождения</span>
+                <strong id="stats-time">00:00</strong>
+            </div>
+            <div class="stats-row">
+                <span>Всего вопросов</span>
+                <strong id="stats-total">0</strong>
+            </div>
+        </div>
+
+        <div class="stats-list-container">
+            <h3>Где ошибался</h3>
+            <ul id="stats-list"></ul>
+        </div>
+
+        <div class="inline-actions" style="margin-top: 12px;">
+            <button type="button" class="submit-btn" id="start-reverse-survey-btn">🔁 Пройти обратный опрос</button>
+            <button type="button" class="submit-btn" id="back-to-editor-btn">Вернуться в редактор</button>
+        </div>
+    </div>
+
+    <div id="library-section" style="display: none;">
+        <div class="header-title">Библиотека тестов</div>
+        <div class="library-search-row">
+            <input type="text" id="saved-tests-search" placeholder="Поиск по названию или автору">
+        </div>
+        <div class="inline-actions" style="margin-bottom: 12px;">
+            <button type="button" class="helper-btn" id="export-tests-btn">⬇️ Сохранить на устройство</button>
+            <button type="button" class="helper-btn" id="import-tests-btn">⬆️ Открыть файл с устройства</button>
+            <input type="file" id="import-tests-file" accept="application/json" style="display: none;">
+        </div>
+        <div class="library-category-block">
+            <h3>Мои тесты</h3>
+            <div id="saved-tests-list" class="saved-tests-list"></div>
+        </div>
+        <div class="library-category-block">
+            <h3>Глобальные тесты</h3>
+            <div id="shared-tests-list" class="saved-tests-list"></div>
+        </div>
+        <button type="button" class="switch-btn" id="back-to-editor-from-library-btn">Вернуться в редактор</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
