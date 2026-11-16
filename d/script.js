@@ -1582,7 +1582,7 @@ async function ocrTextFromImage(imageUrl) {
 
 async function ocrPdfPagesToText(file) {
   const bytes = await file.arrayBuffer();
-  const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(bytes) }).promise;
+  const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(bytes), isEvalSupported: false }).promise;
   const chunks = [];
 
   for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex += 1) {
@@ -1765,7 +1765,7 @@ function generateAutoTestFromPdf(file = null, wrongCountValue = null) {
         }
 
         const pdfBytes = await fileToUse.arrayBuffer();
-        const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(pdfBytes) }).promise;
+        const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(pdfBytes), isEvalSupported: false }).promise;
         for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex += 1) {
           const page = await pdf.getPage(pageIndex);
           const textContent = await page.getTextContent();

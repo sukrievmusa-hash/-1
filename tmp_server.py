@@ -10,6 +10,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
 
-with socketserver.TCPServer(("0.0.0.0", PORT), Handler) as httpd:
-    print(f'Serving on 0.0.0.0:{PORT}')
+with socketserver.TCPServer(("127.0.0.1", PORT), Handler) as httpd:
+    print(f'Serving on 127.0.0.1:{PORT}')
     httpd.serve_forever()
